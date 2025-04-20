@@ -1,14 +1,9 @@
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_scene/camera.dart';
-import 'package:flutter_scene/node.dart';
 import 'package:flutter_scene/scene.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
 import 'package:scene_demo/demo/camera.dart';
@@ -73,7 +68,7 @@ class HUDBox extends StatelessWidget {
         filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           child: DefaultTextStyle.merge(
             style: const TextStyle(
               color: Colors.white,
@@ -147,7 +142,7 @@ class GameplayHUD extends StatelessWidget {
           child: HUDBox(
             child: HUDLabelText(
               label: "💰 ",
-              value: gameState!.coinsCollected.toString().padLeft(3, "0"),
+              value: gameState.coinsCollected.toString().padLeft(3, "0"),
             ),
           ),
         ),
@@ -182,11 +177,11 @@ class SpringCurve extends Curve {
 }
 
 class SheenGradientTransform extends GradientTransform {
-  SheenGradientTransform(this.rotation, this.translation, this.scale);
+  const SheenGradientTransform(this.rotation, this.translation, this.scale);
 
-  double rotation;
-  vm64.Vector3 translation;
-  double scale;
+  final double rotation;
+  final vm64.Vector3 translation;
+  final double scale;
 
   @override
   vm64.Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
@@ -602,7 +597,7 @@ class _GameWidgetState extends State<GameWidget> {
             child: Opacity(
               opacity: math.max(0, math.min(1, 2 - logoAnimation)),
               child: Container(
-                color: Colors.black.withOpacity(1.0),
+                color: Colors.black.withValues(alpha: 1.0),
                 child: Center(
                   child: ImageFiltered(
                     imageFilter: ui.ImageFilter.blur(

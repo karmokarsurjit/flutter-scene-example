@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -85,8 +84,7 @@ int getLeaderboardPlacement(int score, Leaderboard leaderboard) {
 
 /// A widget that displays the leaderboard entry form.
 class LeaderboardForm extends StatefulWidget {
-  const LeaderboardForm({Key? key, required this.score, required this.onSubmit})
-      : super(key: key);
+  const LeaderboardForm({super.key, required this.score, required this.onSubmit});
 
   final int score;
   final Function onSubmit;
@@ -316,7 +314,7 @@ class _LeaderboardFormState extends State<LeaderboardForm> {
 
 /// A widget that displays the leaderboard.
 class LeaderboardWidget extends StatefulWidget {
-  LeaderboardWidget({Key? key}) : super(key: key);
+  const LeaderboardWidget({super.key});
 
   @override
   State<LeaderboardWidget> createState() => _LeaderboardWidgetState();
@@ -418,7 +416,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 250,
       width: 540,
       child: HUDBox(
