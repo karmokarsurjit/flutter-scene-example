@@ -7,11 +7,14 @@ import 'package:flutter_soloud/flutter_soloud.dart';
 import 'package:scene_demo/demo/game.dart';
 
 void main() async {
-  final value = await SoLoud().startIsolate();
-  if (value == PlayerErrors.noError) {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SoLoud.instance.init();
+  final value = SoLoud.instance.isInitialized;
+  if (value) {
     debugPrint('SoLoud isolate started');
   } else {
-    debugPrint('SoLoud isolate error: $value');
+    debugPrint('SoLoud isolate error: ${!value}');
   }
 
   runApp(const DemoApp());

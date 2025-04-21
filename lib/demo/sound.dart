@@ -11,40 +11,40 @@ class SoundServer {
 
   SoundServer._internal();
 
-  SoundProps? pickupCoinSound;
-  SoundProps? shatterSound;
-  SoundProps? jumpSound;
+  AudioSource? pickupCoinSound;
+  AudioSource? shatterSound;
+  AudioSource? jumpSound;
 
   void initialize() {
-    SoloudTools.loadFromAssets("assets/pickupCoin2.wav").then((sound) {
+    SoLoud.instance.loadAsset("assets/pickupCoin2.wav").then((sound) {
       pickupCoinSound = sound;
     });
-    SoloudTools.loadFromAssets("assets/shatter3.ogg").then((sound) {
+    SoLoud.instance.loadAsset("assets/shatter3.ogg").then((sound) {
       shatterSound = sound;
     });
-    SoloudTools.loadFromAssets("assets/jump.wav").then((sound) {
+    SoLoud.instance.loadAsset("assets/jump.wav").then((sound) {
       jumpSound = sound;
     });
   }
 
   void playPickupCoin() {
     if (pickupCoinSound != null) {
-      SoLoud().play(pickupCoinSound!, volume: 0.4).then((value) {
-        SoLoud()
-            .setRelativePlaySpeed(value.newHandle, (Random().nextDouble() - 0.5) * 0.2 + 1.0);
+      SoLoud.instance.play(pickupCoinSound!, volume: 0.4).then((value) {
+        SoLoud.instance.setRelativePlaySpeed(
+            value, (Random().nextDouble() - 0.5) * 0.2 + 1.0);
       });
     }
   }
 
   void playShatter() {
     if (shatterSound != null) {
-      SoLoud().play(shatterSound!, volume: 1.0);
+      SoLoud.instance.play(shatterSound!, volume: 1.0);
     }
   }
 
   void playJump() {
     if (jumpSound != null) {
-      SoLoud().play(jumpSound!, volume: 0.4);
+      SoLoud.instance.play(jumpSound!, volume: 0.4);
     }
   }
 }

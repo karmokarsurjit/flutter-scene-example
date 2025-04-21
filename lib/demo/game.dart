@@ -8,10 +8,10 @@ import 'package:flutter_scene/scene.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
 import 'package:scene_demo/demo/camera.dart';
 import 'package:scene_demo/demo/coin.dart';
+import 'package:scene_demo/demo/input_actions.dart';
 import 'package:scene_demo/demo/leaderboard.dart';
 import 'package:scene_demo/demo/math_utils.dart';
 import 'package:scene_demo/demo/player.dart';
-import 'package:scene_demo/demo/input_actions.dart';
 import 'package:scene_demo/demo/resource_cache.dart';
 import 'package:scene_demo/demo/sound.dart';
 import 'package:scene_demo/demo/spawn.dart';
@@ -21,6 +21,7 @@ import 'package:vector_math/vector_math_64.dart' as vm64;
 
 class ScenePainter extends CustomPainter {
   ScenePainter({required this.scene, required this.camera});
+
   Scene scene;
   Camera camera;
 
@@ -58,6 +59,7 @@ class GameWidget extends StatefulWidget {
 
 class HUDBox extends StatelessWidget {
   const HUDBox({super.key, required this.child});
+
   final Widget child;
 
   @override
@@ -91,6 +93,7 @@ class HUDBox extends StatelessWidget {
 
 class HUDLabelText extends StatelessWidget {
   const HUDLabelText({super.key, required this.label, required this.value});
+
   final String label;
   final String value;
 
@@ -129,6 +132,7 @@ String secondsToFormattedTime(double seconds) {
 
 class GameplayHUD extends StatelessWidget {
   const GameplayHUD({super.key, required this.gameState, required this.time});
+
   final GameState gameState;
   final double time;
 
@@ -136,6 +140,7 @@ class GameplayHUD extends StatelessWidget {
   Widget build(BuildContext context) {
     double secondsRemaining = math.max(0, GameState.kTimeLimit - time);
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
           padding: const EdgeInsets.all(20),
@@ -146,13 +151,15 @@ class GameplayHUD extends StatelessWidget {
             ),
           ),
         ),
-        const Spacer(),
-        Container(
-          padding: const EdgeInsets.all(20),
-          child: HUDBox(
-            child: HUDLabelText(
-              label: "⏱ ",
-              value: secondsToFormattedTime(secondsRemaining),
+        //const Spacer(),
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: HUDBox(
+              child: HUDLabelText(
+                label: "⏱ ",
+                value: secondsToFormattedTime(secondsRemaining),
+              ),
             ),
           ),
         ),
@@ -310,7 +317,7 @@ class _GameWidgetState extends State<GameWidget> {
 
   int lastScore = 0;
 
-  int? currentMusicHandle;
+  SoundHandle? currentMusicHandle;
 
   @override
   void initState() {
@@ -340,25 +347,25 @@ class _GameWidgetState extends State<GameWidget> {
     super.initState();
   }
 
-  void playMusic(SoundProps? music, bool loop, bool fadeIn) {
+  void playMusic(AudioSource? music, bool loop, bool fadeIn) {
     if (currentMusicHandle != null) {
-      SoLoud().stop(currentMusicHandle!);
+      SoLoud.instance.stop(currentMusicHandle!);
     }
     if (music != null) {
-      SoLoud().play(music, volume: 0.0).then((value) {
-        if (value.error != PlayerErrors.noError) {
-          debugPrint('SoLoud error: ${value.error}');
+      SoLoud.instance.play(music, volume: 0.0).then((value) {
+        if (value.isError) {
+          debugPrint('SoLoud error: $value');
         }
-        currentMusicHandle = value.newHandle;
+        currentMusicHandle = value;
         if (loop) {
-          final loopingResult = SoLoud().setLooping(value.newHandle, true);
-          if (loopingResult != PlayerErrors.noError) {
+          SoLoud.instance.setLooping(value, true);
+          if (value.isError) {
             debugPrint('SoLoud error: $value');
           }
         }
         if (fadeIn) {
-          final fadeVolumeResult = SoLoud().fadeVolume(value.newHandle, 1, 0.5);
-          if (fadeVolumeResult != PlayerErrors.noError) {
+          SoLoud.instance.fadeVolume(value, 1, Duration(milliseconds: 500));
+          if (value.isError) {
             debugPrint('SoLoud error: $value');
           }
         }
@@ -524,60 +531,62 @@ class _GameWidgetState extends State<GameWidget> {
               ),
         if (gameMode == GameMode.startMenu && logoAnimation > 1)
           Center(
-              child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                children: [
-                  HUDBox(
-                    child: ShaderMask(
-                      shaderCallback: (bounds) {
-                        return LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: const [
-                              Color.fromARGB(255, 153, 221, 255),
-                              Color.fromARGB(255, 255, 158, 126),
-                              Color.fromARGB(255, 230, 229, 255),
-                              Color.fromARGB(255, 15, 234, 48),
-                              Colors.white,
-                            ],
-                            stops: const [0, 0.1, 0.5, 0.9, 1],
-                            tileMode: TileMode.repeated,
-                            transform: SheenGradientTransform(
-                              -math.pi / 4,
-                              vm64.Vector3(time * 150, 0, 0),
-                              10,
-                            )).createShader(bounds);
-                      },
-                      child: const Text(
-                        "PRESS 🅰️ TO PLAY!",
-                        style: TextStyle(
-                          fontSize: 80,
-                          fontWeight: FontWeight.bold,
+              child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    HUDBox(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: const [
+                                Color.fromARGB(255, 153, 221, 255),
+                                Color.fromARGB(255, 255, 158, 126),
+                                Color.fromARGB(255, 230, 229, 255),
+                                Color.fromARGB(255, 15, 234, 48),
+                                Colors.white,
+                              ],
+                              stops: const [0, 0.1, 0.5, 0.9, 1],
+                              tileMode: TileMode.repeated,
+                              transform: SheenGradientTransform(
+                                -math.pi / 4,
+                                vm64.Vector3(time * 150, 0, 0),
+                                10,
+                              )).createShader(bounds);
+                        },
+                        child: const Text(
+                          "PRESS 🅰️ TO PLAY!",
+                          style: TextStyle(
+                            fontSize: 80,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  const HUDBox(
-                    child: Text(
-                      "🕹️ Left stick to move, 🅰️ to jump",
-                      style: TextStyle(
-                        fontSize: 34,
+                    const SizedBox(height: 20),
+                    const HUDBox(
+                      child: Text(
+                        "🕹️ Left stick to move, 🅰️ to jump",
+                        style: TextStyle(
+                          fontSize: 34,
+                        ),
                       ),
-                    ),
-                  )
-                ],
-              )
-                  .animate(key: const ValueKey("startMenu"))
-                  .fade(duration: 0.2.seconds)
-                  .slide(duration: 1.5.seconds, curve: SpringCurve())
-                  .flip(),
-              const SizedBox(height: 50),
-              LeaderboardWidget()
-            ],
+                    )
+                  ],
+                )
+                    .animate(key: const ValueKey("startMenu"))
+                    .fade(duration: 0.2.seconds)
+                    .slide(duration: 1.5.seconds, curve: SpringCurve())
+                    .flip(),
+                const SizedBox(height: 50),
+                LeaderboardWidget()
+              ],
+            ),
           )),
         if (gameMode == GameMode.leaderboardEntry)
           Center(
@@ -612,8 +621,9 @@ class _GameWidgetState extends State<GameWidget> {
                                 .max(0.0, (-1.0 + logoAnimation) * 40)
                                 .toDouble(),
                         tileMode: TileMode.decal),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         ColorFiltered(
                           colorFilter: const ui.ColorFilter.mode(
